@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { createBrowserSupabase } from '@/lib/supabase-browser'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,13 +13,19 @@ export default function AdminLogin() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Placeholder: In a real app, this would validate against a backend
-    if (email && password) {
-      router.push('/admin/dashboard')
+    setError(null)
+    const supabase = createBrowserSupabase()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      setError(error.message)
+      return
     }
+    router.push('/admin/dashboard')
+    router.refresh()
   }
 
   return (
@@ -58,10 +65,10 @@ export default function AdminLogin() {
               <Button type="submit" className="w-full" size="lg">
                 Sign In
               </Button>
+              {error && (
+                <p className="text-sm text-destructive text-center">{error}</p>
+              )}
             </form>
-            <div className="mt-6 text-center text-sm text-muted-foreground">
-              Demo: Use any email and password to continue
-            </div>
             <div className="mt-4 text-center">
               <Link href="/" className="text-primary hover:underline text-sm">
                 Back to Home
