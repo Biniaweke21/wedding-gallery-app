@@ -1,67 +1,45 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
+import QRCode from 'qrcode'
+import { createServerSupabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { PhotoGrid } from '@/components/photo-grid'
-import { CommentList } from '@/components/comment-list'
-import { ArrowLeft, Download, Trash2 } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { ArrowLeft } from 'lucide-react'
+import { QRCodeDisplay } from '@/components/qr-code-display'
 
-// Mock gallery data
-const MOCK_GALLERY = {
-  couple: 'Abel & Selam',
-  weddingDate: '2024-06-15',
-  expiresAt: '2024-07-15',
-  viewCount: 342,
-  commentCount: 28,
-  message: 'We are so grateful to have captured these beautiful moments with our loved ones.',
-  photos: [
-    { id: 1, url: 'https://images.unsplash.com/photo-1519741497674-611481863552?w=500&h=500&fit=crop' },
-    { id: 2, url: 'https://images.unsplash.com/photo-1531042356691-2ff0a1b638f5?w=500&h=500&fit=crop' },
-    { id: 3, url: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=500&h=500&fit=crop' },
-    { id: 4, url: 'https://images.unsplash.com/photo-1554224311-beee415c15c9?w=500&h=500&fit=crop' },
-    { id: 5, url: 'https://images.unsplash.com/photo-1530519387789-4c1017266635?w=500&h=500&fit=crop' },
-    { id: 6, url: 'https://images.unsplash.com/photo-1536625482828-6cb113ff46cb?w=500&h=500&fit=crop' },
-  ],
-  comments: [
-    {
-      id: 1,
-      name: 'Yohannes',
-      message: 'What a beautiful celebration! Thank you for sharing these wonderful memories.',
-      timestamp: '2024-06-16T10:30:00',
-    },
-    {
-      id: 2,
-      name: 'Almaz',
-      message: 'Simply stunning! The photos capture the joy perfectly.',
-      timestamp: '2024-06-16T14:45:00',
-    },
-    {
-      id: 3,
-      name: 'Dawit',
-      message: 'Congratulations! Wishing you all the best.',
-      timestamp: '2024-06-17T08:15:00',
-    },
-  ],
-}
+export default async function AdminGalleryView({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const supabase = await createServerSupabase()
 
-export default function AdminGalleryView({ params }: { params: { slug: string } }) {
-  const [comments, setComments] = useState(MOCK_GALLERY.comments)
+  const { data: gallery } = await supabase
+    .from('galleries')
+    .select('id, couple_names, wedding_date, expires_at, view_count, comment_count, theme_message, status')
+    .eq('studio_id', process.env.STUDIO_ID!)
+    .eq('slug', slug)
+    .single()
 
-  const deleteComment = (id: number) => {
-    if (confirm('Delete this comment?')) {
-      setComments(comments.filter((c) => c.id !== id))
-    }
-  }
+  if (!gallery) notFound()
 
-  const daysUntilExpiry = Math.ceil(
-    (new Date(MOCK_GALLERY.expiresAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
-  )
+  const { data: comments } = await supabase
+    .from('comments')
+    .select('id, guest_name, message, created_at')
+    .eq('gallery_id', gallery.id)
+    .order('created_at', { ascending: false })
+
+  const headersList = await headers()
+  const host = headersList.get('host') ?? 'localhost:3000'
+  const protocol = host.startsWith('localhost') ? 'http' : 'https'
+  const guestUrl = `${protocol}://${host}/${slug}`
+
+  const qrDataUrl = await QRCode.toDataURL(guestUrl, { width: 300, margin: 2 })
+
+  const daysUntilExpiry = gallery.expires_at
+    ? Math.ceil((new Date(gallery.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    : null
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
       <header className="bg-white border-b border-primary/10 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <Link
@@ -73,60 +51,64 @@ export default function AdminGalleryView({ params }: { params: { slug: string } 
           </Link>
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-serif font-bold text-foreground">{MOCK_GALLERY.couple}</h1>
+              <h1 className="text-3xl font-serif font-bold text-foreground">{gallery.couple_names}</h1>
               <p className="text-sm text-muted-foreground">
-                Wedding: {new Date(MOCK_GALLERY.weddingDate).toLocaleDateString('en-US', {
+                Wedding:{' '}
+                {new Date(gallery.wedding_date).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })}
               </p>
             </div>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Download className="w-4 h-4" />
-              Download All
-            </Button>
+            <Link href={`/${slug}`} target="_blank">
+              <Button variant="outline" size="sm">
+                View Live Gallery
+              </Button>
+            </Link>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Gallery Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4">
           <Card className="border-primary/20">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Views</p>
-              <p className="text-3xl font-bold text-foreground">{MOCK_GALLERY.viewCount}</p>
+              <p className="text-3xl font-bold text-foreground">{gallery.view_count}</p>
             </CardContent>
           </Card>
           <Card className="border-primary/20">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Comments</p>
-              <p className="text-3xl font-bold text-foreground">{comments.length}</p>
+              <p className="text-3xl font-bold text-foreground">{gallery.comment_count}</p>
             </CardContent>
           </Card>
           <Card className="border-primary/20">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Active Until</p>
               <p className="text-lg font-bold text-primary">
-                {daysUntilExpiry > 0 ? `${daysUntilExpiry} days` : 'Expired'}
+                {daysUntilExpiry !== null
+                  ? daysUntilExpiry > 0
+                    ? `${daysUntilExpiry} days`
+                    : 'Expired'
+                  : '—'}
               </p>
-              <p className="text-xs text-muted-foreground">{MOCK_GALLERY.expiresAt}</p>
+              {gallery.expires_at && (
+                <p className="text-xs text-muted-foreground">{gallery.expires_at.slice(0, 10)}</p>
+              )}
             </CardContent>
           </Card>
         </div>
 
-        {/* Photos */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Wedding Photos</h2>
-          <PhotoGrid photos={MOCK_GALLERY.photos} />
-        </div>
+        {/* QR Code */}
+        <QRCodeDisplay qrDataUrl={qrDataUrl} guestUrl={guestUrl} />
 
-        {/* Comments Section */}
+        {/* Comments */}
         <div>
           <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Guest Comments</h2>
-          {comments.length === 0 ? (
+          {!comments || comments.length === 0 ? (
             <Card className="border-primary/20">
               <CardContent className="py-12 text-center">
                 <p className="text-muted-foreground">No comments yet</p>
@@ -137,28 +119,17 @@ export default function AdminGalleryView({ params }: { params: { slug: string } 
               {comments.map((comment) => (
                 <Card key={comment.id} className="border-primary/20">
                   <CardContent className="pt-6">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <p className="font-semibold text-foreground">{comment.name}</p>
-                        <p className="text-sm text-muted-foreground mt-1">{comment.message}</p>
-                        <p className="text-xs text-muted-foreground mt-2">
-                          {new Date(comment.timestamp).toLocaleDateString('en-US', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                      </div>
-                      <button
-                        onClick={() => deleteComment(comment.id)}
-                        className="text-muted-foreground hover:text-destructive transition-colors p-2"
-                        title="Delete comment"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <p className="font-semibold text-foreground">{comment.guest_name}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{comment.message}</p>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {new Date(comment.created_at).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
                   </CardContent>
                 </Card>
               ))}
