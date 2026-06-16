@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase'
+import { submitComment } from '@/lib/actions'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -135,7 +136,9 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
           <Card className="border-primary/20 bg-white">
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">Leave Your Wishes</h3>
-              <form className="space-y-4">
+              <form action={submitComment} className="space-y-4">
+                <input type="hidden" name="gallery_id" value={gallery.id} />
+                <input type="hidden" name="slug" value={slug} />
                 <div className="space-y-1">
                   <Label htmlFor="guest_name">Your Name</Label>
                   <Input id="guest_name" name="guest_name" placeholder="Your name" required className="border-primary/30" />
