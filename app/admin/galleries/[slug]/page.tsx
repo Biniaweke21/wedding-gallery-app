@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import QRCode from 'qrcode'
 import { createServerSupabase } from '@/lib/supabase'
+import { checkAndExpireGallery } from '@/lib/expiry'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
@@ -21,10 +22,12 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
 
   if (!gallery) notFound()
 
+  const checkedGallery = await checkAndExpireGallery(supabase, gallery)
+
   const { data: photos } = await supabase
     .from('photos')
     .select('id, storage_path')
-    .eq('gallery_id', gallery.id)
+    .eq('gallery_id', checkedGallery.id)
     .order('created_at', { ascending: true })
 
   const photosWithUrls = (photos ?? []).map((p) => ({
@@ -35,7 +38,7 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
   const { data: comments } = await supabase
     .from('comments')
     .select('id, guest_name, message, created_at')
-    .eq('gallery_id', gallery.id)
+    .eq('gallery_id', checkedGallery.id)
     .order('created_at', { ascending: false })
 
   const headersList = await headers()
@@ -45,8 +48,8 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
 
   const qrDataUrl = await QRCode.toDataURL(guestUrl, { width: 300, margin: 2 })
 
-  const daysUntilExpiry = gallery.expires_at
-    ? Math.ceil((new Date(gallery.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+  const daysUntilExpiry = checkedGallery.expires_at
+    ? Math.ceil((new Date(checkedGallery.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : null
 
   return (
@@ -62,10 +65,10 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
           </Link>
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-3xl font-serif font-bold text-foreground">{gallery.couple_names}</h1>
+              <h1 className="text-3xl font-serif font-bold text-foreground">{checkedGallery.couple_names}</h1>
               <p className="text-sm text-muted-foreground">
                 Wedding:{' '}
-                {new Date(gallery.wedding_date).toLocaleDateString('en-US', {
+                {new Date(checkedGallery.wedding_date).toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
@@ -87,13 +90,13 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
           <Card className="border-primary/20">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Views</p>
-              <p className="text-3xl font-bold text-foreground">{gallery.view_count}</p>
+              <p className="text-3xl font-bold text-foreground">{checkedGallery.view_count}</p>
             </CardContent>
           </Card>
           <Card className="border-primary/20">
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground">Comments</p>
-              <p className="text-3xl font-bold text-foreground">{gallery.comment_count}</p>
+              <p className="text-3xl font-bold text-foreground">{checkedGallery.comment_count}</p>
             </CardContent>
           </Card>
           <Card className="border-primary/20">
@@ -106,8 +109,8 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
                     : 'Expired'
                   : '—'}
               </p>
-              {gallery.expires_at && (
-                <p className="text-xs text-muted-foreground">{gallery.expires_at.slice(0, 10)}</p>
+              {checkedGallery.expires_at && (
+                <p className="text-xs text-muted-foreground">{checkedGallery.expires_at.slice(0, 10)}</p>
               )}
             </CardContent>
           </Card>

@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import GalleryList from '@/components/gallery-list'
 import { Plus, LogOut } from 'lucide-react'
 import { createServerSupabase } from '@/lib/supabase'
+import { checkAndExpireGallery } from '@/lib/expiry'
 
 export default async function AdminDashboard() {
   const supabase = await createServerSupabase()
@@ -13,7 +14,9 @@ export default async function AdminDashboard() {
     .eq('studio_id', process.env.STUDIO_ID!)
     .order('created_at', { ascending: false })
 
-  const galleries = (rows ?? []).map((g) => ({
+  const checked = await Promise.all((rows ?? []).map((g) => checkAndExpireGallery(supabase, g)))
+
+  const galleries = checked.map((g) => ({
     id: g.id,
     couple: g.couple_names,
     date: g.wedding_date,

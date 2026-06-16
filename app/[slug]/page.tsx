@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { createServerSupabase } from '@/lib/supabase'
+import { checkAndExpireGallery } from '@/lib/expiry'
 import { submitComment } from '@/lib/actions'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -20,9 +21,11 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
 
   if (!gallery) notFound()
 
-  supabase.from('galleries').update({ view_count: gallery.view_count + 1 }).eq('id', gallery.id)
+  const checkedGallery = await checkAndExpireGallery(supabase, gallery)
 
-  if (gallery.status === 'expired') {
+  supabase.from('galleries').update({ view_count: checkedGallery.view_count + 1 }).eq('id', checkedGallery.id)
+
+  if (checkedGallery.status === 'expired') {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <p className="text-lg text-muted-foreground text-center">This gallery has expired.</p>
@@ -34,12 +37,12 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
     supabase
       .from('photos')
       .select('id, storage_path')
-      .eq('gallery_id', gallery.id)
+      .eq('gallery_id', checkedGallery.id)
       .order('created_at', { ascending: true }),
     supabase
       .from('comments')
       .select('id, guest_name, message, created_at')
-      .eq('gallery_id', gallery.id)
+      .eq('gallery_id', checkedGallery.id)
       .order('created_at', { ascending: true }),
   ])
 
@@ -48,8 +51,8 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
     url: supabase.storage.from('photos').getPublicUrl(p.storage_path).data.publicUrl,
   }))
 
-  const expiryDate = gallery.expires_at
-    ? new Date(gallery.expires_at).toLocaleDateString('en-US', {
+  const expiryDate = checkedGallery.expires_at
+    ? new Date(checkedGallery.expires_at).toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -60,9 +63,9 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary">
       <header className="bg-white border-b border-primary/10">
         <div className="max-w-3xl mx-auto px-4 py-6">
-          <h1 className="text-4xl font-serif font-bold text-foreground">{gallery.couple_names}</h1>
+          <h1 className="text-4xl font-serif font-bold text-foreground">{checkedGallery.couple_names}</h1>
           <p className="text-muted-foreground mt-1">
-            {new Date(gallery.wedding_date).toLocaleDateString('en-US', {
+            {new Date(checkedGallery.wedding_date).toLocaleDateString('en-US', {
               year: 'numeric',
               month: 'long',
               day: 'numeric',
@@ -80,7 +83,7 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
         {gallery.theme_message && (
           <Card className="border-primary/20 bg-white">
             <CardContent className="pt-6">
-              <p className="text-foreground text-center">{gallery.theme_message}</p>
+              <p className="text-foreground text-center">{checkedGallery.theme_message}</p>
             </CardContent>
           </Card>
         )}
@@ -137,7 +140,7 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
             <CardContent className="pt-6">
               <h3 className="text-lg font-semibold text-foreground mb-4">Leave Your Wishes</h3>
               <form action={submitComment} className="space-y-4">
-                <input type="hidden" name="gallery_id" value={gallery.id} />
+                <input type="hidden" name="gallery_id" value={checkedGallery.id} />
                 <input type="hidden" name="slug" value={slug} />
                 <div className="space-y-1">
                   <Label htmlFor="guest_name">Your Name</Label>
