@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 import { QRCodeDisplay } from '@/components/qr-code-display'
+import AdminCommentList from '@/components/admin-comment-list'
 
 export default async function AdminGalleryView({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -139,33 +140,7 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
         {/* Comments */}
         <div>
           <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Guest Comments</h2>
-          {!comments || comments.length === 0 ? (
-            <Card className="border-primary/20">
-              <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">No comments yet</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {comments.map((comment) => (
-                <Card key={comment.id} className="border-primary/20">
-                  <CardContent className="pt-6">
-                    <p className="font-semibold text-foreground">{comment.guest_name}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{comment.message}</p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {new Date(comment.created_at).toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <AdminCommentList comments={comments ?? []} />
         </div>
       </main>
     </div>
