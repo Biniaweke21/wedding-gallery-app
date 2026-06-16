@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
   const expiresAt = new Date(createdAt)
   expiresAt.setDate(expiresAt.getDate() + 7)
 
-  const { error } = await supabase.from('galleries').insert({
+  const { data, error } = await supabase.from('galleries').insert({
     studio_id: studioId,
     slug,
     couple_names: `${coupleName1} & ${coupleName2}`,
@@ -50,11 +50,11 @@ export async function POST(req: NextRequest) {
     status: 'active',
     view_count: 0,
     comment_count: 0,
-  })
+  }).select('id').single()
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  return NextResponse.json({ slug })
+  return NextResponse.json({ slug, id: data?.id, studioId })
 }

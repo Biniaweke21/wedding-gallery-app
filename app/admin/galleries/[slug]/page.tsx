@@ -21,6 +21,17 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
 
   if (!gallery) notFound()
 
+  const { data: photos } = await supabase
+    .from('photos')
+    .select('id, storage_path')
+    .eq('gallery_id', gallery.id)
+    .order('created_at', { ascending: true })
+
+  const photosWithUrls = (photos ?? []).map((p) => ({
+    id: p.id,
+    url: supabase.storage.from('photos').getPublicUrl(p.storage_path).data.publicUrl,
+  }))
+
   const { data: comments } = await supabase
     .from('comments')
     .select('id, guest_name, message, created_at')
@@ -101,6 +112,23 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
             </CardContent>
           </Card>
         </div>
+
+        {/* Photos */}
+        {photosWithUrls.length > 0 && (
+          <div>
+            <h2 className="text-2xl font-serif font-bold text-foreground mb-4">Wedding Photos</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {photosWithUrls.map((photo) => (
+                <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden bg-secondary">
+                  <img src={photo.url} alt="Wedding photo" className="w-full h-full object-cover" />
+                  <span className="absolute bottom-2 right-2 text-white/60 text-xs font-semibold select-none pointer-events-none drop-shadow">
+                    {process.env.NEXT_PUBLIC_STUDIO_ID ?? process.env.STUDIO_ID}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* QR Code */}
         <QRCodeDisplay qrDataUrl={qrDataUrl} guestUrl={guestUrl} />
