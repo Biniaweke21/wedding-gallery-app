@@ -42,6 +42,11 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
       .order('created_at', { ascending: true }),
   ])
 
+  const photosWithUrls = (photos ?? []).map((p) => ({
+    id: p.id,
+    url: supabase.storage.from('photos').getPublicUrl(p.storage_path).data.publicUrl,
+  }))
+
   const expiryDate = gallery.expires_at
     ? new Date(gallery.expires_at).toLocaleDateString('en-US', {
         year: 'numeric',
@@ -82,14 +87,14 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
         {/* Photos */}
         <div>
           <h2 className="text-2xl font-serif font-bold text-foreground mb-4">Wedding Gallery</h2>
-          {!photos || photos.length === 0 ? (
+          {!photosWithUrls || photosWithUrls.length === 0 ? (
             <p className="text-muted-foreground text-sm">No photos yet.</p>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {photos.map((photo) => (
+              {photosWithUrls.map((photo) => (
                 <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-secondary">
                   <img
-                    src={photo.storage_path}
+                    src={photo.url}
                     alt="Wedding photo"
                     className="w-full h-full object-cover"
                   />
