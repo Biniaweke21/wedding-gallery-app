@@ -1,9 +1,7 @@
 export const runtime = 'nodejs'
 export const maxDuration = 30
 
-import 'sharp'
 import { NextRequest, NextResponse } from 'next/server'
-import sharp from 'sharp'
 import { createServerSupabase } from '@/lib/supabase'
 
 export async function POST(req: NextRequest) {
@@ -24,26 +22,14 @@ export async function POST(req: NextRequest) {
   }
 
   const studioId = process.env.STUDIO_ID!
+  const storagePath = `${studioId}/${slug}/${Date.now()}-${file.name}`
+
   const arrayBuffer = await file.arrayBuffer()
-  const inputBuffer = Buffer.from(arrayBuffer)
-
-  let compressed: Buffer
-  try {
-    compressed = await sharp(inputBuffer)
-      .resize({ width: 1600, withoutEnlargement: true })
-      .flatten({ background: { r: 255, g: 255, b: 255 } })
-      .jpeg({ quality: 80 })
-      .toBuffer()
-  } catch (err) {
-    return NextResponse.json({ error: 'Image processing failed' }, { status: 500 })
-  }
-
-  const baseName = file.name.replace(/\.[^.]+$/, '')
-  const storagePath = `${studioId}/${slug}/${Date.now()}-${baseName}.jpg`
+  const buffer = Buffer.from(arrayBuffer)
 
   const { error: uploadError } = await supabase.storage
     .from('photos')
-    .upload(storagePath, compressed, { contentType: 'image/jpeg' })
+    .upload(storagePath, buffer, { contentType: file.type })
 
   if (uploadError) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 })

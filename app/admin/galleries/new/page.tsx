@@ -14,6 +14,24 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024
 const MAX_FILES = 20
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
+async function resizeImage(file: File, maxWidth = 1600, quality = 0.8): Promise<Blob> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      const scale = Math.min(1, maxWidth / img.width)
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width * scale
+      canvas.height = img.height * scale
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      URL.revokeObjectURL(url)
+      canvas.toBlob((blob) => resolve(blob!), 'image/jpeg', quality)
+    }
+    img.src = url
+  })
+}
+
 interface FileEntry {
   file: File
   preview: string
@@ -87,8 +105,15 @@ export default function NewGallery() {
         setUploadProgress(`Uploading ${i + 1}/${validFiles.length}...`)
         const { file } = validFiles[i]
 
+        const resized = await resizeImage(file)
+        const resizedFile = new File(
+          [resized],
+          file.name.replace(/\.[^.]+$/, '.jpg'),
+          { type: 'image/jpeg' }
+        )
+
         const fileForm = new FormData()
-        fileForm.append('file', file)
+        fileForm.append('file', resizedFile)
         fileForm.append('gallery_id', galleryId)
         fileForm.append('slug', slug)
 
