@@ -35,11 +35,11 @@ export default function GuestPhotoGrid({ photos }: GuestPhotoGridProps) {
           <button
             key={photo.id}
             onClick={() => setSelectedIndex(index)}
-            className="relative aspect-square rounded-lg overflow-hidden focus:outline-none focus:ring-2 focus:ring-primary"
+            className="relative aspect-square rounded-xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-amber-300 hover:scale-[1.02] transition-transform duration-200"
           >
             {/* Skeleton */}
             {!loaded[photo.id] && (
-              <div className="absolute inset-0 bg-primary/10 animate-pulse rounded-lg" />
+              <div className="absolute inset-0 bg-amber-100 animate-pulse rounded-xl" />
             )}
             <img
               src={photo.url}
