@@ -1,5 +1,7 @@
 export const runtime = 'nodejs'
+export const maxDuration = 30
 
+import 'sharp'
 import { NextRequest, NextResponse } from 'next/server'
 import sharp from 'sharp'
 import { createServerSupabase } from '@/lib/supabase'
