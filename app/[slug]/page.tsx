@@ -1,6 +1,7 @@
+import GuestPhotoGrid from '@/components/guest-photo-grid'
 import { notFound } from 'next/navigation'
-import { createServerSupabase } from '@/lib/supabase'
 import { checkAndExpireGallery } from '@/lib/expiry'
+import { createServerSupabase } from '@/lib/supabase'
 import { submitComment } from '@/lib/actions'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -94,17 +95,7 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
           {!photosWithUrls || photosWithUrls.length === 0 ? (
             <p className="text-muted-foreground text-sm">No photos yet.</p>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {photosWithUrls.map((photo) => (
-                <div key={photo.id} className="aspect-square rounded-lg overflow-hidden bg-secondary">
-                  <img
-                    src={photo.url}
-                    alt="Wedding photo"
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
+            <GuestPhotoGrid photos={photosWithUrls} />
           )}
         </div>
 

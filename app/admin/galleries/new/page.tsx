@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { createBrowserSupabase } from '@/lib/supabase-browser'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -82,28 +81,25 @@ export default function NewGallery() {
     const validFiles = fileEntries.filter((e) => !e.error)
 
     if (validFiles.length > 0) {
-      const supabase = createBrowserSupabase()
       const failedFiles: string[] = []
 
       for (let i = 0; i < validFiles.length; i++) {
         setUploadProgress(`Uploading ${i + 1}/${validFiles.length}...`)
         const { file } = validFiles[i]
-        const ext = file.name.split('.').pop()
-        const storagePath = `${studioId}/${slug}/${Date.now()}-${i}.${ext}`
 
-        const { error: uploadError } = await supabase.storage
-          .from('photos')
-          .upload(storagePath, file, { contentType: file.type })
+        const fileForm = new FormData()
+        fileForm.append('file', file)
+        fileForm.append('gallery_id', galleryId)
+        fileForm.append('slug', slug)
 
-        if (uploadError) {
-          failedFiles.push(file.name)
-          continue
-        }
-
-        await supabase.from('photos').insert({
-          gallery_id: galleryId,
-          storage_path: storagePath,
+        const uploadRes = await fetch('/api/photos/upload', {
+          method: 'POST',
+          body: fileForm,
         })
+
+        if (!uploadRes.ok) {
+          failedFiles.push(file.name)
+        }
       }
 
       if (failedFiles.length > 0) {
