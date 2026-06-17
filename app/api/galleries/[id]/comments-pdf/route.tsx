@@ -1,0 +1,202 @@
+export const runtime = 'nodejs'
+
+import { NextRequest, NextResponse } from 'next/server'
+import { renderToBuffer, Document, Page, View, Text, StyleSheet } from '@react-pdf/renderer'
+import { createServerSupabase } from '@/lib/supabase'
+
+const BLUSH = '#c9747a'
+const CREAM = '#fdf8f4'
+const CHARCOAL = '#2d2d2d'
+const MUTED = '#8a7e78'
+const DIVIDER = '#e8d5cc'
+
+const styles = StyleSheet.create({
+  page: {
+    backgroundColor: CREAM,
+    paddingTop: 56,
+    paddingBottom: 56,
+    paddingHorizontal: 56,
+    fontFamily: 'Times-Roman',
+  },
+  cover: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  coupleNames: {
+    fontSize: 32,
+    color: CHARCOAL,
+    letterSpacing: 1.5,
+    marginBottom: 8,
+    fontFamily: 'Times-Bold',
+  },
+  weddingDate: {
+    fontSize: 13,
+    color: MUTED,
+    letterSpacing: 1,
+    marginBottom: 20,
+  },
+  dividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '100%',
+  },
+  dividerLine: {
+    flex: 1,
+    height: 0.75,
+    backgroundColor: BLUSH,
+  },
+  dividerDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: BLUSH,
+    marginHorizontal: 8,
+  },
+  sectionHeader: {
+    fontSize: 14,
+    color: BLUSH,
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginBottom: 28,
+    fontFamily: 'Times-Italic',
+  },
+  commentCard: {
+    marginBottom: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 0.5,
+    borderBottomColor: DIVIDER,
+    borderBottomStyle: 'solid',
+  },
+  guestName: {
+    fontSize: 12,
+    color: CHARCOAL,
+    fontFamily: 'Times-Bold',
+    marginBottom: 5,
+  },
+  message: {
+    fontSize: 11,
+    color: CHARCOAL,
+    fontFamily: 'Times-Italic',
+    lineHeight: 1.6,
+    marginBottom: 6,
+  },
+  commentDate: {
+    fontSize: 9,
+    color: MUTED,
+  },
+  noComments: {
+    fontSize: 12,
+    color: MUTED,
+    fontFamily: 'Times-Italic',
+    textAlign: 'center',
+    marginTop: 24,
+  },
+  footer: {
+    position: 'absolute',
+    bottom: 24,
+    left: 56,
+    right: 56,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 8,
+    color: MUTED,
+    letterSpacing: 0.5,
+  },
+  footerLine: {
+    height: 0.5,
+    backgroundColor: DIVIDER,
+    marginBottom: 6,
+  },
+})
+
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const supabase = await createServerSupabase()
+
+  const { data: gallery } = await supabase
+    .from('galleries')
+    .select('id, couple_names, wedding_date, slug')
+    .eq('id', id)
+    .eq('studio_id', process.env.STUDIO_ID!)
+    .single()
+
+  if (!gallery) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { data: comments } = await supabase
+    .from('comments')
+    .select('id, guest_name, message, created_at')
+    .eq('gallery_id', id)
+    .order('created_at', { ascending: true })
+
+  const weddingDate = new Date(gallery.wedding_date).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
+
+  const studioId = process.env.STUDIO_ID ?? 'Studio'
+
+  const pdf = await renderToBuffer(
+    <Document title={`${gallery.couple_names} — Guest Wishes`} author={studioId}>
+      <Page size="A4" style={styles.page}>
+        {/* Cover */}
+        <View style={styles.cover}>
+          <Text style={styles.coupleNames}>{gallery.couple_names}</Text>
+          <Text style={styles.weddingDate}>{weddingDate}</Text>
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <View style={styles.dividerDot} />
+            <View style={styles.dividerLine} />
+          </View>
+          <Text style={styles.sectionHeader}>Wishes from Our Guests</Text>
+        </View>
+
+        {/* Comments */}
+        {!comments || comments.length === 0 ? (
+          <Text style={styles.noComments}>No wishes have been shared yet.</Text>
+        ) : (
+          comments.map((c) => (
+            <View key={c.id} style={styles.commentCard}>
+              <Text style={styles.guestName}>{c.guest_name}</Text>
+              <Text style={styles.message}>{c.message}</Text>
+              <Text style={styles.commentDate}>
+                {new Date(c.created_at).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </Text>
+            </View>
+          ))
+        )}
+
+        {/* Footer */}
+        <View style={styles.footer} fixed>
+          <View style={{ flex: 1 }}>
+            <View style={styles.footerLine} />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text style={styles.footerText}>{gallery.slug}</Text>
+              <Text style={styles.footerText}>Generated by {studioId}</Text>
+            </View>
+          </View>
+        </View>
+      </Page>
+    </Document>
+  )
+
+  return new NextResponse(new Uint8Array(pdf), {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${gallery.slug}-wishes.pdf"`,
+    },
+  })
+}

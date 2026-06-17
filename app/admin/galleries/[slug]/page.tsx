@@ -139,7 +139,16 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
 
         {/* Comments */}
         <div>
-          <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Guest Comments</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-serif font-bold text-foreground">Guest Comments</h2>
+            <a
+              href={`/api/galleries/${checkedGallery.id}/comments-pdf`}
+              download
+              className="inline-flex items-center gap-2 text-sm text-primary border border-primary/30 rounded-md px-3 py-1.5 hover:bg-primary/5 transition-colors"
+            >
+              Download Wishes (PDF)
+            </a>
+          </div>
           <AdminCommentList comments={comments ?? []} />
         </div>
       </main>
