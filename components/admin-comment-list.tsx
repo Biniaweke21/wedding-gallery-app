@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
 import { Trash2 } from 'lucide-react'
 
 interface Comment {
@@ -33,43 +32,42 @@ export default function AdminCommentList({ comments: initial }: AdminCommentList
 
   if (comments.length === 0) {
     return (
-      <Card className="border-primary/20">
-        <CardContent className="py-12 text-center">
-          <p className="text-muted-foreground">No comments yet</p>
-        </CardContent>
-      </Card>
+      <div className="py-12 text-center rounded-2xl" style={{ backgroundColor: '#ffffff', border: '1px solid #e8d5b0' }}>
+        <p className="text-sm" style={{ color: '#a0856c' }}>No comments yet</p>
+      </div>
     )
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {comments.map((comment) => (
-        <Card key={comment.id} className="border-primary/20">
-          <CardContent className="pt-6">
-            <div className="flex justify-between items-start gap-4">
-              <div className="flex-1">
-                <p className="font-semibold text-foreground">{comment.guest_name}</p>
-                <p className="text-sm text-muted-foreground mt-1">{comment.message}</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  {new Date(comment.created_at).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </p>
-              </div>
-              <button
-                onClick={() => handleDelete(comment.id)}
-                className="text-muted-foreground hover:text-destructive transition-colors p-1 shrink-0"
-                title="Delete comment"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+        <div
+          key={comment.id}
+          className="rounded-xl p-4 flex gap-3"
+          style={{ backgroundColor: '#ffffff', border: '1px solid #e8d5b0' }}
+        >
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-sm" style={{ color: '#2c1810' }}>{comment.guest_name}</p>
+            <p className="text-sm mt-1" style={{ color: '#4a3728' }}>{comment.message}</p>
+            <p className="text-xs italic mt-2" style={{ color: '#a0856c' }}>
+              {new Date(comment.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
+            </p>
+          </div>
+          <button
+            onClick={() => handleDelete(comment.id)}
+            className="shrink-0 p-1.5 rounded-lg transition-colors hover:bg-red-50"
+            style={{ color: '#c0392b' }}
+            title="Delete comment"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       ))}
     </div>
   )

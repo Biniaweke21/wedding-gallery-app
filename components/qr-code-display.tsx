@@ -1,7 +1,5 @@
 'use client'
 
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Download } from 'lucide-react'
 
 interface QRCodeDisplayProps {
@@ -18,18 +16,21 @@ export function QRCodeDisplay({ qrDataUrl, guestUrl }: QRCodeDisplayProps) {
   }
 
   return (
-    <Card className="border-primary/20 bg-white">
-      <CardContent className="pt-6">
-        <div className="text-center">
-          <p className="text-sm text-muted-foreground mb-4">Scan to view gallery</p>
-          <img src={qrDataUrl} alt="QR Code" className="w-48 h-48 mx-auto" />
-          <p className="text-xs text-muted-foreground mt-4 font-mono break-all">{guestUrl}</p>
-          <Button variant="outline" size="sm" className="mt-4 gap-2" onClick={handleDownload}>
-            <Download className="w-4 h-4" />
-            Download QR Code
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <div
+      className="rounded-2xl p-6 text-center"
+      style={{ backgroundColor: '#ffffff', border: '1px solid #e8d5b0' }}
+    >
+      <p className="text-xs mb-4 font-medium" style={{ color: '#a0856c' }}>Scan to view gallery</p>
+      <img src={qrDataUrl} alt="QR Code" className="w-48 h-48 mx-auto rounded-lg" />
+      <p className="text-xs mt-3 font-mono break-all" style={{ color: '#a0856c' }}>{guestUrl}</p>
+      <button
+        onClick={handleDownload}
+        className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium transition hover:bg-amber-50"
+        style={{ border: '1px solid #8b6914', color: '#8b6914' }}
+      >
+        <Download className="w-4 h-4" />
+        Download QR Code
+      </button>
+    </div>
   )
 }

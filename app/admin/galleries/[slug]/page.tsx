@@ -4,8 +4,6 @@ import { headers } from 'next/headers'
 import QRCode from 'qrcode'
 import { createServerSupabase } from '@/lib/supabase'
 import { checkAndExpireGallery } from '@/lib/expiry'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 import { QRCodeDisplay } from '@/components/qr-code-display'
 import AdminCommentList from '@/components/admin-comment-list'
@@ -53,79 +51,96 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
     ? Math.ceil((new Date(checkedGallery.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
     : null
 
+  const isExpired = checkedGallery.status === 'expired'
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-white border-b border-primary/10 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div style={{ minHeight: '100vh', backgroundColor: '#fafaf9' }}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+        {/* Back + title */}
+        <div>
           <Link
             href="/admin/dashboard"
-            className="inline-flex items-center gap-2 text-primary hover:text-primary/80 mb-4"
+            className="inline-flex items-center gap-2 text-sm mb-4 hover:underline"
+            style={{ color: '#a0856c' }}
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </Link>
-          <div className="flex justify-between items-start">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <h1 className="text-3xl font-serif font-bold text-foreground">{checkedGallery.couple_names}</h1>
-              <p className="text-sm text-muted-foreground">
-                Wedding:{' '}
+              <h1 className="text-3xl font-serif font-bold" style={{ color: '#2c1810' }}>
+                {checkedGallery.couple_names}
+              </h1>
+              <p className="text-sm mt-1" style={{ color: '#a0856c' }}>
                 {new Date(checkedGallery.wedding_date).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
+                  year: 'numeric', month: 'long', day: 'numeric',
                 })}
               </p>
             </div>
             <Link href={`/${slug}`} target="_blank">
-              <Button variant="outline" size="sm">
+              <button
+                className="px-4 py-2 rounded-full text-sm font-medium transition hover:bg-amber-50"
+                style={{ border: '1px solid #8b6914', color: '#8b6914', backgroundColor: 'transparent' }}
+              >
                 View Live Gallery
-              </Button>
+              </button>
             </Link>
           </div>
         </div>
-      </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card className="border-primary/20">
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Views</p>
-              <p className="text-3xl font-bold text-foreground">{checkedGallery.view_count}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-primary/20">
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Comments</p>
-              <p className="text-3xl font-bold text-foreground">{checkedGallery.comment_count}</p>
-            </CardContent>
-          </Card>
-          <Card className="border-primary/20">
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground">Active Until</p>
-              <p className="text-lg font-bold text-primary">
-                {daysUntilExpiry !== null
-                  ? daysUntilExpiry > 0
-                    ? `${daysUntilExpiry} days`
-                    : 'Expired'
-                  : '—'}
-              </p>
-              {checkedGallery.expires_at && (
-                <p className="text-xs text-muted-foreground">{checkedGallery.expires_at.slice(0, 10)}</p>
-              )}
-            </CardContent>
-          </Card>
+        {/* Stats + QR two-column */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Info card */}
+          <div className="rounded-2xl p-6 space-y-4" style={{ backgroundColor: '#ffffff', border: '1px solid #e8d5b0' }}>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <p className="text-xs mb-1" style={{ color: '#a0856c' }}>Views</p>
+                <p className="text-2xl font-bold font-serif" style={{ color: '#2c1810' }}>{checkedGallery.view_count}</p>
+              </div>
+              <div>
+                <p className="text-xs mb-1" style={{ color: '#a0856c' }}>Comments</p>
+                <p className="text-2xl font-bold font-serif" style={{ color: '#2c1810' }}>{checkedGallery.comment_count}</p>
+              </div>
+              <div>
+                <p className="text-xs mb-1" style={{ color: '#a0856c' }}>Status</p>
+                <span
+                  className="inline-block px-2 py-0.5 rounded-full text-xs font-medium"
+                  style={isExpired
+                    ? { backgroundColor: '#f3f4f6', color: '#6b7280' }
+                    : { backgroundColor: '#ecfdf5', color: '#27ae60' }}
+                >
+                  {isExpired ? 'Expired' : 'Active'}
+                </span>
+              </div>
+            </div>
+            {daysUntilExpiry !== null && (
+              <div>
+                <p className="text-xs mb-1" style={{ color: '#a0856c' }}>Active Until</p>
+                <p className="text-sm font-medium" style={{ color: '#8b6914' }}>
+                  {daysUntilExpiry > 0 ? `${daysUntilExpiry} days remaining` : 'Expired'}
+                </p>
+                {checkedGallery.expires_at && (
+                  <p className="text-xs mt-0.5" style={{ color: '#a0856c' }}>
+                    {checkedGallery.expires_at.slice(0, 10)}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* QR card */}
+          <QRCodeDisplay qrDataUrl={qrDataUrl} guestUrl={guestUrl} />
         </div>
 
         {/* Photos */}
         {photosWithUrls.length > 0 && (
           <div>
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-4">Wedding Photos</h2>
+            <h2 className="text-xl font-serif font-bold mb-4" style={{ color: '#2c1810' }}>Wedding Photos</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {photosWithUrls.map((photo) => (
-                <div key={photo.id} className="relative aspect-square rounded-lg overflow-hidden bg-secondary">
+                <div key={photo.id} className="relative aspect-square rounded-xl overflow-hidden" style={{ backgroundColor: '#f5ede3' }}>
                   <img src={photo.url} alt="Wedding photo" className="w-full h-full object-cover" />
-                  <span className="absolute bottom-2 right-2 text-white/60 text-xs font-semibold select-none pointer-events-none drop-shadow">
+                  <span className="absolute bottom-2 right-2 text-white/70 text-xs font-semibold select-none pointer-events-none drop-shadow">
                     {process.env.NEXT_PUBLIC_STUDIO_ID ?? process.env.STUDIO_ID}
                   </span>
                 </div>
@@ -134,24 +149,22 @@ export default async function AdminGalleryView({ params }: { params: Promise<{ s
           </div>
         )}
 
-        {/* QR Code */}
-        <QRCodeDisplay qrDataUrl={qrDataUrl} guestUrl={guestUrl} />
-
         {/* Comments */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-serif font-bold text-foreground">Guest Comments</h2>
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <h2 className="text-xl font-serif font-bold" style={{ color: '#2c1810' }}>Guest Comments</h2>
             <a
               href={`/api/galleries/${checkedGallery.id}/comments-pdf`}
               download
-              className="inline-flex items-center gap-2 text-sm text-primary border border-primary/30 rounded-md px-3 py-1.5 hover:bg-primary/5 transition-colors"
+              className="px-4 py-1.5 rounded-full text-sm font-medium transition hover:bg-amber-50"
+              style={{ border: '1px solid #8b6914', color: '#8b6914' }}
             >
               Download Wishes (PDF)
             </a>
           </div>
           <AdminCommentList comments={comments ?? []} />
         </div>
-      </main>
+      </div>
     </div>
   )
 }

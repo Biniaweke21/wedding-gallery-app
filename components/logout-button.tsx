@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation'
 import { createBrowserSupabase } from '@/lib/supabase-browser'
-import { Button } from '@/components/ui/button'
 
 export default function LogoutButton() {
   const router = useRouter()
@@ -15,8 +14,12 @@ export default function LogoutButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleLogout}>
+    <button
+      onClick={handleLogout}
+      className="text-sm font-medium px-4 py-2 rounded-full transition-colors hover:bg-amber-50"
+      style={{ color: '#a0856c' }}
+    >
       Log out
-    </Button>
+    </button>
   )
 }
