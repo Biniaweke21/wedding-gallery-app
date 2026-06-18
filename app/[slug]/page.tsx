@@ -24,7 +24,7 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
 
   const checkedGallery = await checkAndExpireGallery(supabase, gallery)
 
-  supabase.from('galleries').update({ view_count: checkedGallery.view_count + 1 }).eq('id', checkedGallery.id)
+  await supabase.rpc('increment_view_count', { gallery_id: checkedGallery.id })
 
   if (checkedGallery.status === 'expired') {
     return (
@@ -147,11 +147,11 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
                 <input type="hidden" name="slug" value={slug} />
                 <div className="space-y-1">
                   <Label htmlFor="guest_name" style={{ color: '#4a3728' }}>Your Name</Label>
-                  <Input id="guest_name" name="guest_name" placeholder="Your name" required className="focus:ring-amber-400" style={{ borderColor: '#e8d5b0' }} />
+                  <Input id="guest_name" name="guest_name" placeholder="Your name" required className="focus:ring-amber-400" style={{ borderColor: '#e8d5b0', backgroundColor: '#ffffff', color: '#2c1810' }} />
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="message" style={{ color: '#4a3728' }}>Message</Label>
-                  <Textarea id="message" name="message" placeholder="Share your wishes..." required className="min-h-24 focus:ring-amber-400" style={{ borderColor: '#e8d5b0' }} />
+                  <Textarea id="message" name="message" placeholder="Share your wishes..." required className="min-h-24 focus:ring-amber-400" style={{ borderColor: '#e8d5b0', backgroundColor: '#ffffff', color: '#2c1810' }} />
                 </div>
                 <Button type="submit" className="w-full rounded-full text-white hover:opacity-90 transition-opacity" style={{ backgroundColor: '#8b6914' }}>
                   Send Wishes

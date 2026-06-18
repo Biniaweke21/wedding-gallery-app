@@ -19,18 +19,7 @@ export async function submitComment(formData: FormData) {
     message,
   })
 
-  const { data: gallery } = await supabase
-    .from('galleries')
-    .select('comment_count')
-    .eq('id', galleryId)
-    .single()
-
-  if (gallery) {
-    await supabase
-      .from('galleries')
-      .update({ comment_count: gallery.comment_count + 1 })
-      .eq('id', galleryId)
-  }
+  await supabase.rpc('increment_comment_count', { gallery_id: galleryId })
 
   revalidatePath(`/${slug}`)
 }
