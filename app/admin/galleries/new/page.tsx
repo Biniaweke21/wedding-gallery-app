@@ -169,7 +169,7 @@ export default function NewGallery() {
 
             <div>
               <label htmlFor="weddingDate" style={labelStyle}>Wedding Date *</label>
-              <input id="weddingDate" name="weddingDate" type="date" required style={inputStyle} className="focus:ring-2 focus:ring-amber-400" />
+              <input id="weddingDate" name="weddingDate" type="date" required style={inputStyle} className="focus:ring-2 focus:ring-amber-400 [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert-[0.4] [&::-webkit-calendar-picker-indicator]:sepia [&::-webkit-calendar-picker-indicator]:saturate-200 [&::-webkit-calendar-picker-indicator]:hue-rotate-[10deg]" />
             </div>
 
             <div>
