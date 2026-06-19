@@ -24,6 +24,7 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
 
   const checkedGallery = await checkAndExpireGallery(supabase, gallery)
 
+  console.log('[VIEW INCREMENT]', checkedGallery.id, new Date().toISOString())
   await supabase.rpc('increment_view_count', { gallery_id: checkedGallery.id })
 
   if (checkedGallery.status === 'expired') {
