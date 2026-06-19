@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 interface Photo {
@@ -15,6 +15,17 @@ interface GuestPhotoGridProps {
 export default function GuestPhotoGrid({ photos }: GuestPhotoGridProps) {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
   const [loaded, setLoaded] = useState<Record<string, boolean>>({})
+
+  useEffect(() => {
+    const imgs = document.querySelectorAll('img[data-photo-id]')
+    imgs.forEach((img) => {
+      const htmlImg = img as HTMLImageElement
+      if (htmlImg.complete) {
+        const id = htmlImg.dataset.photoId
+        if (id) setLoaded((prev) => prev[id] ? prev : { ...prev, [id]: true })
+      }
+    })
+  }, [])
 
   const handlePrev = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -46,7 +57,7 @@ export default function GuestPhotoGrid({ photos }: GuestPhotoGridProps) {
               alt={`Wedding photo ${index + 1}`}
               loading="lazy"
               decoding="async"
-              ref={(el) => { if (el?.complete) setLoaded((prev) => ({ ...prev, [photo.id]: true })) }}
+              data-photo-id={photo.id}
               className={`w-full h-full object-cover transition-opacity duration-500 ${
                 loaded[photo.id] ? 'opacity-100' : 'opacity-0'
               }`}
