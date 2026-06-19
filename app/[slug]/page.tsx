@@ -25,6 +25,8 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
 
   const checkedGallery = await checkAndExpireGallery(supabase, gallery)
 
+  const viewToken = crypto.randomUUID()
+
   if (checkedGallery.status === 'expired') {
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#fdf8f2' }}>
@@ -61,7 +63,7 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#fdf8f2' }}>
-      <ViewTracker galleryId={checkedGallery.id} />
+      <ViewTracker galleryId={checkedGallery.id} viewToken={viewToken} />
       <header style={{ backgroundColor: '#fffef9', borderBottom: '1px solid #e8d5b0' }}>
         <div className="max-w-3xl mx-auto px-4 py-8">
           <h1 className="text-5xl font-serif font-bold" style={{ color: '#2c1810' }}>
