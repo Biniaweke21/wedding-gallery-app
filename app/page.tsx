@@ -1,28 +1,41 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-secondary flex items-center justify-center px-4">
-      <div className="text-center max-w-2xl mx-auto">
-        <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground mb-6 text-pretty">
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-16"
+      style={{
+        backgroundColor: '#fdf8f2',
+        background: 'radial-gradient(ellipse at 50% 40%, #f5e6c8 0%, #fdf8f2 65%)',
+      }}
+    >
+      <div className="text-center max-w-xl mx-auto">
+        <h1
+          className="text-5xl md:text-6xl font-serif font-bold mb-4 leading-tight"
+          style={{ color: '#2c1810' }}
+        >
           QR Wedding Gallery
         </h1>
-        <p className="text-xl md:text-2xl text-foreground/80 mb-12 text-pretty">
+
+        <div className="flex justify-center mb-6">
+          <div className="h-0.5 w-16 rounded-full bg-amber-300" />
+        </div>
+
+        <p
+          className="text-lg md:text-xl leading-relaxed mb-10 mx-auto max-w-md"
+          style={{ color: '#a0856c' }}
+        >
           Capture and share your wedding memories with elegant, QR-powered galleries. Perfect for Ethiopian wedding studios.
         </p>
-        <div className="flex gap-4 justify-center flex-col sm:flex-row">
-          <Link href="/admin/login">
-            <Button size="lg" className="w-full sm:w-auto">
-              Studio Access
-            </Button>
-          </Link>
-          <Link href="/abel-and-selam">
-            <Button size="lg" variant="outline" className="w-full sm:w-auto">
-              View Sample Gallery
-            </Button>
-          </Link>
-        </div>
+
+        <Link href="/admin/login">
+          <button
+            className="px-8 py-3 rounded-full text-white font-semibold text-base transition-colors duration-200 hover:opacity-90"
+            style={{ backgroundColor: '#8b6914' }}
+          >
+            Studio Sign In
+          </button>
+        </Link>
       </div>
     </div>
   )
