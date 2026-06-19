@@ -9,6 +9,10 @@ export const studioId = process.env.STUDIO_ID!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+export function createServiceRoleSupabase() {
+  return createClient(supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+}
+
 export function createBrowserSupabase() {
   return createBrowserClient(supabaseUrl, supabaseAnonKey)
 }
