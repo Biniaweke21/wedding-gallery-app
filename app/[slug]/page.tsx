@@ -1,3 +1,4 @@
+import ViewTracker from '@/components/view-tracker'
 import GuestPhotoGrid from '@/components/guest-photo-grid'
 import { notFound } from 'next/navigation'
 import { checkAndExpireGallery } from '@/lib/expiry'
@@ -23,9 +24,6 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
   if (!gallery) notFound()
 
   const checkedGallery = await checkAndExpireGallery(supabase, gallery)
-
-  console.log('[VIEW INCREMENT]', checkedGallery.id, new Date().toISOString())
-  await supabase.rpc('increment_view_count', { gallery_id: checkedGallery.id })
 
   if (checkedGallery.status === 'expired') {
     return (
@@ -63,6 +61,7 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#fdf8f2' }}>
+      <ViewTracker galleryId={checkedGallery.id} />
       <header style={{ backgroundColor: '#fffef9', borderBottom: '1px solid #e8d5b0' }}>
         <div className="max-w-3xl mx-auto px-4 py-8">
           <h1 className="text-5xl font-serif font-bold" style={{ color: '#2c1810' }}>
