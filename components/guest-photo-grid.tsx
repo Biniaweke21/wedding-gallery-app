@@ -46,6 +46,7 @@ export default function GuestPhotoGrid({ photos }: GuestPhotoGridProps) {
               alt={`Wedding photo ${index + 1}`}
               loading="lazy"
               decoding="async"
+              ref={(el) => { if (el?.complete) setLoaded((prev) => ({ ...prev, [photo.id]: true })) }}
               className={`w-full h-full object-cover transition-opacity duration-500 ${
                 loaded[photo.id] ? 'opacity-100' : 'opacity-0'
               }`}
