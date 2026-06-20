@@ -33,6 +33,27 @@ interface FileEntry {
   error?: string
 }
 
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '10px 14px',
+  borderRadius: '8px',
+  border: '1px solid var(--color-sand)',
+  backgroundColor: '#ffffff',
+  color: 'var(--color-ink)',
+  fontSize: '14px',
+  fontFamily: 'var(--font-body)',
+  outline: 'none',
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '14px',
+  fontWeight: 500,
+  fontFamily: 'var(--font-body)',
+  color: 'var(--color-ink)',
+  marginBottom: '6px',
+}
+
 export default function NewGallery() {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -90,27 +111,18 @@ export default function NewGallery() {
 
     if (validFiles.length > 0) {
       const failedFiles: string[] = []
-
       for (let i = 0; i < validFiles.length; i++) {
         setUploadProgress(`Uploading ${i + 1}/${validFiles.length}...`)
         const { file } = validFiles[i]
-
         const resized = await resizeImage(file)
-        const resizedFile = new File(
-          [resized],
-          file.name.replace(/\.[^.]+$/, '.jpg'),
-          { type: 'image/jpeg' }
-        )
-
+        const resizedFile = new File([resized], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' })
         const fileForm = new FormData()
         fileForm.append('file', resizedFile)
         fileForm.append('gallery_id', galleryId)
         fileForm.append('slug', slug)
-
         const uploadRes = await fetch('/api/photos/upload', { method: 'POST', body: fileForm })
         if (!uploadRes.ok) failedFiles.push(file.name)
       }
-
       if (failedFiles.length > 0) {
         setUploadProgress(null)
         setError(`Some files failed to upload: ${failedFiles.join(', ')}`)
@@ -120,129 +132,92 @@ export default function NewGallery() {
     router.push(`/admin/galleries/${slug}`)
   }
 
-  const inputStyle = {
-    width: '100%',
-    padding: '10px 14px',
-    borderRadius: '8px',
-    border: '1px solid #e8d5b0',
-    backgroundColor: '#ffffff',
-    color: '#2c1810',
-    fontSize: '14px',
-    outline: 'none',
-  }
-
-  const labelStyle = {
-    display: 'block',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: '#2c1810',
-    marginBottom: '4px',
-  }
-
   return (
-    <div className="py-10 px-4" style={{ backgroundColor: '#fafaf9', minHeight: '100vh' }}>
-      <div className="max-w-2xl mx-auto">
-        <Link
-          href="/admin/dashboard"
-          className="inline-flex items-center gap-2 text-sm mb-6 hover:underline"
-          style={{ color: '#a0856c' }}
-        >
+    <div className="py-8 px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto">
+        <Link href="/admin/dashboard" className="inline-flex items-center gap-1.5 text-sm mb-6 hover:underline" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </Link>
 
-        <div className="rounded-2xl shadow-sm p-8" style={{ backgroundColor: '#ffffff', border: '1px solid #e8d5b0' }}>
-          <h1 className="text-3xl font-serif font-bold mb-1" style={{ color: '#2c1810' }}>New Wedding Gallery</h1>
-          <p className="text-sm mb-8" style={{ color: '#a0856c' }}>Set up a beautiful gallery for your couple</p>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="coupleName1" style={labelStyle}>Partner 1 Name *</label>
-                <input id="coupleName1" name="coupleName1" placeholder="e.g., Abel" required style={inputStyle} className="focus:ring-2 focus:ring-amber-400" />
-              </div>
-              <div>
-                <label htmlFor="coupleName2" style={labelStyle}>Partner 2 Name *</label>
-                <input id="coupleName2" name="coupleName2" placeholder="e.g., Selam" required style={inputStyle} className="focus:ring-2 focus:ring-amber-400" />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="weddingDate" style={labelStyle}>Wedding Date *</label>
-              <input id="weddingDate" name="weddingDate" type="date" required style={inputStyle} className="focus:ring-2 focus:ring-amber-400 [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert-[0.4] [&::-webkit-calendar-picker-indicator]:sepia [&::-webkit-calendar-picker-indicator]:saturate-200 [&::-webkit-calendar-picker-indicator]:hue-rotate-[10deg]" />
-            </div>
-
-            <div>
-              <label htmlFor="message" style={labelStyle}>Gallery Message (Optional)</label>
-              <textarea
-                id="message"
-                name="message"
-                placeholder="Add a welcome message..."
-                style={{ ...inputStyle, minHeight: '96px', resize: 'vertical' }}
-                className="focus:ring-2 focus:ring-amber-400"
-              />
-            </div>
-
-            <div>
-              <label style={labelStyle}>Wedding Photos</label>
-              <div
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-                onClick={() => inputRef.current?.click()}
-                className="cursor-pointer rounded-xl p-8 text-center transition-colors hover:bg-amber-50"
-                style={{ border: '2px dashed #e8d5b0', backgroundColor: '#fafaf9' }}
-              >
-                <Upload className="w-10 h-10 mx-auto mb-2" style={{ color: '#8b6914' }} />
-                <p className="text-sm font-medium" style={{ color: '#2c1810' }}>Drag photos here or click to browse</p>
-                <p className="text-xs mt-1" style={{ color: '#a0856c' }}>JPG, PNG, WebP — max 5MB each, up to 20 files</p>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  multiple
-                  accept="image/jpeg,image/png,image/webp"
-                  className="hidden"
-                  onChange={(e) => addFiles(Array.from(e.target.files ?? []))}
-                />
-              </div>
-
-              {fileEntries.length > 0 && (
-                <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2">
-                  {fileEntries.map((entry, i) => (
-                    <div key={i} className="relative aspect-square rounded-lg overflow-hidden" style={{ border: '1px solid #e8d5b0' }}>
-                      {entry.error ? (
-                        <div className="w-full h-full flex items-center justify-center p-2" style={{ backgroundColor: '#fef2f2' }}>
-                          <p className="text-xs text-center break-words" style={{ color: '#c0392b' }}>{entry.error}</p>
-                        </div>
-                      ) : (
-                        <img src={entry.preview} alt="" className="w-full h-full object-cover" />
-                      )}
-                      <button
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); removeFile(i) }}
-                        className="absolute top-1 right-1 rounded-full p-0.5 text-white hover:bg-black/80 transition-colors"
-                        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {error && <p className="text-sm" style={{ color: '#c0392b' }}>{error}</p>}
-            {uploadProgress && <p className="text-sm font-medium" style={{ color: '#8b6914' }}>{uploadProgress}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-full text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
-              style={{ backgroundColor: '#8b6914' }}
-            >
-              {loading ? (uploadProgress ?? 'Creating...') : 'Create Gallery'}
-            </button>
-          </form>
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-ink)' }}>New Wedding Gallery</h1>
+          <p className="text-sm mt-1" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>Add the couple's details and photos to generate their gallery.</p>
         </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="rounded-xl overflow-hidden shadow-sm" style={{ backgroundColor: '#ffffff', border: '1px solid var(--color-sand)' }}>
+            <div className="flex flex-col lg:flex-row">
+              <div className="flex-[55] p-8 space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="coupleName1" style={labelStyle}>Partner 1 Name *</label>
+                    <input id="coupleName1" name="coupleName1" placeholder="e.g., Abel" required style={inputStyle} className="focus:ring-2 focus:ring-amber-400" />
+                  </div>
+                  <div>
+                    <label htmlFor="coupleName2" style={labelStyle}>Partner 2 Name *</label>
+                    <input id="coupleName2" name="coupleName2" placeholder="e.g., Selam" required style={inputStyle} className="focus:ring-2 focus:ring-amber-400" />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="weddingDate" style={labelStyle}>Wedding Date *</label>
+                  <input id="weddingDate" name="weddingDate" type="date" required style={inputStyle} className="focus:ring-2 focus:ring-amber-400 [&::-webkit-calendar-picker-indicator]:opacity-100 [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert-[0.4] [&::-webkit-calendar-picker-indicator]:sepia [&::-webkit-calendar-picker-indicator]:saturate-200 [&::-webkit-calendar-picker-indicator]:hue-rotate-[10deg]" />
+                </div>
+
+                <div>
+                  <label htmlFor="message" style={labelStyle}>Gallery Message (Optional)</label>
+                  <textarea id="message" name="message" placeholder="Add a welcome message..." style={{ ...inputStyle, minHeight: '96px', resize: 'vertical' }} className="focus:ring-2 focus:ring-amber-400" />
+                </div>
+
+                {error && <p className="text-xs" style={{ fontFamily: 'var(--font-body)', color: '#c0392b' }}>{error}</p>}
+
+                <button type="submit" disabled={loading} className="w-full py-2.5 px-6 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-60" style={{ fontFamily: 'var(--font-body)', backgroundColor: 'var(--color-berry)' }}>
+                  {loading ? (uploadProgress ?? 'Creating...') : 'Create Gallery'}
+                </button>
+              </div>
+
+              <div className="hidden lg:block w-px" style={{ backgroundColor: 'var(--color-sand)' }} />
+
+              <div className="flex-[45] p-8">
+                <label style={labelStyle}>Wedding Photos</label>
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={(e) => e.preventDefault()}
+                  onClick={() => inputRef.current?.click()}
+                  className="cursor-pointer rounded-xl p-8 text-center transition-colors hover:bg-amber-50"
+                  style={{ border: '2px dashed var(--color-sand)', backgroundColor: '#fdf8f2' }}
+                >
+                  <Upload className="w-8 h-8 mx-auto mb-3" style={{ color: 'var(--color-gold)' }} />
+                  <p className="text-sm font-medium" style={{ fontFamily: 'var(--font-body)', color: 'var(--color-ink)' }}>Drag photos here or click to browse</p>
+                  <p className="text-xs mt-1" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>JPG, PNG, WebP — max 5MB each, up to 20 files</p>
+                  <input ref={inputRef} type="file" multiple accept="image/jpeg,image/png,image/webp" className="hidden" onChange={(e) => addFiles(Array.from(e.target.files ?? []))} />
+                </div>
+
+                {uploadProgress && <p className="text-xs mt-3" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>{uploadProgress}</p>}
+
+                {fileEntries.length > 0 && (
+                  <div className="mt-3 grid grid-cols-3 sm:grid-cols-4 gap-2">
+                    {fileEntries.map((entry, i) => (
+                      <div key={i} className="relative aspect-square rounded-lg overflow-hidden" style={{ border: '1px solid var(--color-sand)' }}>
+                        {entry.error ? (
+                          <div className="w-full h-full flex items-center justify-center p-2" style={{ backgroundColor: '#fef2f2' }}>
+                            <p className="text-xs text-center break-words" style={{ color: '#c0392b' }}>{entry.error}</p>
+                          </div>
+                        ) : (
+                          <img src={entry.preview} alt="" className="w-full h-full object-cover" />
+                        )}
+                        <button type="button" onClick={(e) => { e.stopPropagation(); removeFile(i) }} className="absolute top-1 right-1 rounded-full p-0.5 text-white hover:bg-black/80 transition-colors" style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}>
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   )

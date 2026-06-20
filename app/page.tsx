@@ -1,42 +1,77 @@
 import Link from 'next/link'
+import TibebBorder from '@/components/tibeb-border'
 
 export default function LandingPage() {
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4 py-16"
-      style={{
-        backgroundColor: '#fdf8f2',
-        background: 'radial-gradient(ellipse at 50% 40%, #f5e6c8 0%, #fdf8f2 65%)',
-      }}
-    >
-      <div className="text-center max-w-xl mx-auto">
-        <h1
-          className="text-5xl md:text-6xl font-serif font-bold mb-4 leading-tight"
-          style={{ color: '#2c1810' }}
-        >
-          QR Wedding Gallery
-        </h1>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: 'var(--color-parchment)' }}>
+      <TibebBorder delay={0} />
 
-        <div className="flex justify-center mb-6">
-          <div className="h-0.5 w-16 rounded-full bg-amber-300" />
-        </div>
-
-        <p
-          className="text-lg md:text-xl leading-relaxed mb-10 mx-auto max-w-md"
-          style={{ color: '#a0856c' }}
-        >
-          Capture and share your wedding memories with elegant, QR-powered galleries. Perfect for Ethiopian wedding studios.
-        </p>
-
-        <Link href="/admin/login">
-          <button
-            className="px-8 py-3 rounded-full text-white font-semibold text-base transition-colors duration-200 hover:opacity-90"
-            style={{ backgroundColor: '#8b6914' }}
+      <div className="flex-1 flex items-center justify-center px-4 py-16">
+        <div className="text-center max-w-xl mx-auto">
+          <h1
+            className="text-4xl sm:text-5xl font-semibold tracking-tight anim-fade-rise"
+            style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--color-ink)',
+              animationDuration: '600ms',
+              animationDelay: '200ms',
+              animationFillMode: 'backwards',
+              animationTimingFunction: 'ease-out',
+            }}
           >
-            Studio Sign In
-          </button>
-        </Link>
+            QR Wedding Gallery
+          </h1>
+
+          <div
+            className="mx-auto mt-4 mb-4 anim-scale-x"
+            style={{
+              width: '48px',
+              height: '1px',
+              backgroundColor: 'var(--color-gold)',
+              transformOrigin: 'center',
+              animationDuration: '400ms',
+              animationDelay: '350ms',
+              animationFillMode: 'backwards',
+              animationTimingFunction: 'ease-out',
+            }}
+          />
+
+          <p
+            className="text-lg leading-relaxed max-w-md mx-auto anim-fade-rise"
+            style={{
+              fontFamily: 'var(--font-body)',
+              color: '#a0856c',
+              animationDuration: '600ms',
+              animationDelay: '450ms',
+              animationFillMode: 'backwards',
+              animationTimingFunction: 'ease-out',
+            }}
+          >
+            Capture and share your wedding memories with elegant, QR-powered galleries. Perfect for Ethiopian wedding studios.
+          </p>
+
+          <div
+            className="mt-8 anim-fade-rise"
+            style={{
+              animationDuration: '600ms',
+              animationDelay: '550ms',
+              animationFillMode: 'backwards',
+              animationTimingFunction: 'ease-out',
+            }}
+          >
+            <Link href="/admin/login">
+              <button
+                className="px-8 py-3 rounded-full text-white font-semibold text-base transition-opacity hover:opacity-90"
+                style={{ fontFamily: 'var(--font-body)', backgroundColor: 'var(--color-berry)' }}
+              >
+                Studio Sign In
+              </button>
+            </Link>
+          </div>
+        </div>
       </div>
+
+      <TibebBorder delay={300} />
     </div>
   )
 }

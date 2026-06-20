@@ -1,3 +1,4 @@
+import TibebBorder from '@/components/tibeb-border'
 import ViewTracker from '@/components/view-tracker'
 import GuestPhotoGrid from '@/components/guest-photo-grid'
 import { notFound } from 'next/navigation'
@@ -53,48 +54,66 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
     url: supabase.storage.from('photos').getPublicUrl(p.storage_path).data.publicUrl,
   }))
 
-  const expiryDate = checkedGallery.expires_at
-    ? new Date(checkedGallery.expires_at).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null
-
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#fdf8f2' }}>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--color-parchment)' }}>
       <ViewTracker galleryId={checkedGallery.id} viewToken={viewToken} />
-      <header style={{ backgroundColor: '#fffef9', borderBottom: '1px solid #e8d5b0' }}>
-        <div className="max-w-3xl mx-auto px-4 py-8">
-          <h1 className="text-5xl font-serif font-bold" style={{ color: '#2c1810' }}>
+      <header>
+        <TibebBorder delay={0} />
+        <div className="max-w-3xl mx-auto px-4 py-10 sm:py-14 text-center">
+          <h1
+            className="text-4xl sm:text-5xl font-semibold tracking-tight anim-fade-rise"
+            style={{
+              fontFamily: 'var(--font-display)',
+              color: 'var(--color-ink)',
+              animationDuration: '600ms',
+              animationDelay: '400ms',
+              animationFillMode: 'backwards',
+              animationTimingFunction: 'ease-out',
+            }}
+          >
             {checkedGallery.couple_names}
           </h1>
-          <div className="border-b-2 border-amber-300 w-16 mt-3 mb-2" />
-          <p className="font-medium" style={{ color: '#8b6914' }}>
+          <p
+            className="mt-3 text-sm uppercase tracking-wide anim-fade-rise"
+            style={{
+              fontFamily: 'var(--font-body)',
+              color: 'var(--color-gold)',
+              animationDuration: '600ms',
+              animationDelay: '550ms',
+              animationFillMode: 'backwards',
+              animationTimingFunction: 'ease-out',
+            }}
+          >
             {new Date(checkedGallery.wedding_date).toLocaleDateString('en-US', {
-              year: 'numeric',
               month: 'long',
               day: 'numeric',
-            })}
+            }).toUpperCase()} · {new Date(checkedGallery.wedding_date).getFullYear()}
           </p>
-          {expiryDate && (
-            <p className="text-xs italic mt-2" style={{ color: '#a0856c' }}>
-              This gallery is available until {expiryDate}
-            </p>
-          )}
+          <div
+            className="mx-auto mt-4 mb-4 anim-scale-x"
+            style={{
+              width: '48px',
+              height: '1px',
+              backgroundColor: 'var(--color-gold)',
+              transformOrigin: 'center',
+              animationDuration: '400ms',
+              animationDelay: '700ms',
+              animationFillMode: 'backwards',
+              animationTimingFunction: 'ease-out',
+            }}
+          />
         </div>
+        <TibebBorder delay={750} />
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-10">
         {checkedGallery.theme_message && (
-          <Card style={{ backgroundColor: '#fffef9', borderColor: '#e8d5b0' }}>
-            <CardContent className="pt-6 pb-6">
-              <span className="block text-center text-3xl" style={{ color: '#d4a839' }}>❝</span>
-              <p className="text-lg italic text-center" style={{ color: '#2c1810' }}>
-                {checkedGallery.theme_message}
-              </p>
-            </CardContent>
-          </Card>
+          <div className="py-10 sm:py-14 text-center max-w-xl mx-auto">
+            <span className="block text-5xl leading-none mb-4" style={{ color: 'var(--color-gold)', opacity: 0.4 }}>❝</span>
+            <p className="text-xl italic leading-relaxed" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-ink)' }}>
+              {checkedGallery.theme_message}
+            </p>
+          </div>
         )}
 
         {/* Photos */}
@@ -116,51 +135,56 @@ export default async function PublicGallery({ params }: { params: Promise<{ slug
 
         {/* Comments */}
         <div>
-          <h2 className="text-2xl font-serif font-bold mb-4" style={{ color: '#2c1810' }}>
+          <h2 className="text-2xl font-semibold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-ink)' }}>
             Guest Wishes ({comments?.length ?? 0})
           </h2>
-          <div className="space-y-4 mb-8">
+          <div className="flex justify-center mb-6">
+            <div className="flex items-center gap-2">
+              <div className="h-px w-12" style={{ backgroundColor: '#d4a839' }} />
+              <span className="text-xs" style={{ color: '#d4a839' }}>✦</span>
+              <div className="h-px w-12" style={{ backgroundColor: '#d4a839' }} />
+            </div>
+          </div>
+          <div className="space-y-5 mb-8">
             {!comments || comments.length === 0 ? (
-              <p className="text-sm italic" style={{ color: '#a0856c' }}>No wishes yet — be the first!</p>
+              <p className="text-sm italic text-center py-6" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>No wishes yet — be the first!</p>
             ) : (
               comments.map((comment) => (
-                <Card key={comment.id} className="shadow-sm" style={{ backgroundColor: '#fffef9', borderColor: '#e8d5b0' }}>
-                  <CardContent className="pt-4 pb-4">
-                    <p className="font-semibold" style={{ color: '#2c1810' }}>{comment.guest_name}</p>
-                    <p className="text-sm mt-1" style={{ color: '#4a3728' }}>{comment.message}</p>
-                    <p className="text-xs italic mt-2" style={{ color: '#a0856c' }}>
+                <div key={comment.id} className="border-l-2 pl-4 py-2" style={{ borderColor: 'var(--color-sand)' }}>
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="text-base font-medium" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-berry)' }}>{comment.guest_name}</span>
+                    <span className="text-xs" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>
                       {new Date(comment.created_at).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
                         year: 'numeric',
                       })}
-                    </p>
-                  </CardContent>
-                </Card>
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed mt-1" style={{ fontFamily: 'var(--font-body)', color: 'var(--color-ink)' }}>{comment.message}</p>
+                </div>
               ))
             )}
           </div>
 
-          <Card style={{ backgroundColor: '#fffef9', borderColor: '#e8d5b0' }}>
-            <CardContent className="pt-6">
-              <h3 className="text-lg font-serif font-semibold mb-4" style={{ color: '#2c1810' }}>Leave Your Wishes</h3>
-              <form action={submitComment} className="space-y-4">
-                <input type="hidden" name="gallery_id" value={checkedGallery.id} />
-                <input type="hidden" name="slug" value={slug} />
-                <div className="space-y-1">
-                  <Label htmlFor="guest_name" style={{ color: '#4a3728' }}>Your Name</Label>
-                  <Input id="guest_name" name="guest_name" placeholder="Your name" required className="focus:ring-amber-400" style={{ borderColor: '#e8d5b0', backgroundColor: '#ffffff', color: '#2c1810' }} />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="message" style={{ color: '#4a3728' }}>Message</Label>
-                  <Textarea id="message" name="message" placeholder="Share your wishes..." required className="min-h-24 focus:ring-amber-400" style={{ borderColor: '#e8d5b0', backgroundColor: '#ffffff', color: '#2c1810' }} />
-                </div>
-                <Button type="submit" className="w-full rounded-full text-white hover:opacity-90 transition-opacity" style={{ backgroundColor: '#8b6914' }}>
-                  Send Wishes
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+          <div className="rounded-xl shadow-sm p-6 sm:p-8" style={{ backgroundColor: '#fffef9', border: '1px solid var(--color-sand)' }}>
+            <h3 className="text-lg font-semibold mb-4" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-ink)' }}>Leave Your Wishes</h3>
+            <form action={submitComment} className="space-y-4">
+              <input type="hidden" name="gallery_id" value={checkedGallery.id} />
+              <input type="hidden" name="slug" value={slug} />
+              <div className="space-y-1">
+                <Label htmlFor="guest_name" style={{ fontFamily: 'var(--font-body)', color: 'var(--color-ink)' }}>Your Name</Label>
+                <Input id="guest_name" name="guest_name" placeholder="Your name" required className="focus:ring-2 focus:ring-[var(--color-gold)]" style={{ borderColor: 'var(--color-sand)', backgroundColor: '#ffffff', color: 'var(--color-ink)' }} />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="message" style={{ fontFamily: 'var(--font-body)', color: 'var(--color-ink)' }}>Message</Label>
+                <Textarea id="message" name="message" placeholder="Share your wishes..." required className="min-h-24 focus:ring-2 focus:ring-[var(--color-gold)]" style={{ borderColor: 'var(--color-sand)', backgroundColor: '#ffffff', color: 'var(--color-ink)' }} />
+              </div>
+              <Button type="submit" className="w-full rounded-full text-white font-semibold hover:opacity-90 transition-opacity" style={{ fontFamily: 'var(--font-body)', backgroundColor: 'var(--color-berry)' }}>
+                Send Wishes
+              </Button>
+            </form>
+          </div>
         </div>
       </main>
     </div>

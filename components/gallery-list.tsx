@@ -35,7 +35,7 @@ export default function GalleryList({ galleries: initial }: GalleryListProps) {
   }
 
   return (
-    <div className="grid gap-4">
+    <div>
       {galleries.map((gallery) => (
         <GalleryCard
           key={gallery.id}

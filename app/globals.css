@@ -2,6 +2,22 @@
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
 
+:root {
+  --color-ink: #1a1410;
+  --color-parchment: #f7f0e4;
+  --color-gold: #b8860b;
+  --color-berry: #6b1f2e;
+  --color-sand: #e3d4b8;
+
+  --admin-bg: #0f1f1a;
+  --admin-surface: #16271f;
+  --admin-surface-alt: #1c3128;
+  --admin-text-primary: #f3ead9;
+  --admin-text-secondary: #9bb0a4;
+  --admin-accent: #c9a35e;
+  --admin-border: #2a3d33;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -165,5 +181,30 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-x-in {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-rise,
+  .anim-scale-x,
+  .anim-fade-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

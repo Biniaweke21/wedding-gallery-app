@@ -25,15 +25,24 @@ export default async function AdminDashboard() {
     expiresAt: g.expires_at ?? '',
   }))
 
+  const totalViews = galleries.reduce((s, g) => s + g.viewCount, 0)
+  const totalComments = galleries.reduce((s, g) => s + g.commentCount, 0)
+
   return (
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-serif font-bold" style={{ color: '#2c1810' }}>Your Galleries</h1>
+    <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+        <div className="flex items-center gap-6">
+          <h1 className="text-3xl font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-ink)' }}>
+            Your Galleries
+          </h1>
+          <div className="hidden sm:flex items-center gap-4 text-sm" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>
+            <span>{galleries.length} {galleries.length === 1 ? 'gallery' : 'galleries'}</span>
+            <span style={{ borderLeft: '1px solid var(--color-sand)', paddingLeft: '1rem' }}>{totalViews} views</span>
+            <span style={{ borderLeft: '1px solid var(--color-sand)', paddingLeft: '1rem' }}>{totalComments} comments</span>
+          </div>
+        </div>
         <Link href="/admin/galleries/new">
-          <button
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-white transition hover:opacity-90"
-            style={{ backgroundColor: '#8b6914' }}
-          >
+          <button className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ fontFamily: 'var(--font-body)', backgroundColor: 'var(--color-berry)' }}>
             <Plus className="w-4 h-4" />
             New Wedding
           </button>
@@ -41,20 +50,19 @@ export default async function AdminDashboard() {
       </div>
 
       {galleries.length === 0 ? (
-        <div className="text-center py-20">
-          <h2 className="text-xl font-serif mb-2" style={{ color: '#2c1810' }}>No galleries yet</h2>
-          <p className="text-sm mb-6" style={{ color: '#a0856c' }}>Create your first gallery to get started</p>
+        <div className="text-center py-24">
+          <h2 className="text-xl font-semibold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-ink)' }}>No galleries yet</h2>
+          <p className="text-sm mb-6" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>Create your first gallery to get started</p>
           <Link href="/admin/galleries/new">
-            <button
-              className="px-6 py-2.5 rounded-full text-sm font-semibold text-white transition hover:opacity-90"
-              style={{ backgroundColor: '#8b6914' }}
-            >
+            <button className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90" style={{ fontFamily: 'var(--font-body)', backgroundColor: 'var(--color-berry)' }}>
               Create your first gallery
             </button>
           </Link>
         </div>
       ) : (
-        <GalleryList galleries={galleries} />
+        <div className="rounded-xl overflow-hidden shadow-sm" style={{ border: '1px solid var(--color-sand)', backgroundColor: '#ffffff' }}>
+          <GalleryList galleries={galleries} />
+        </div>
       )}
     </main>
   )

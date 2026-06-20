@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Eye, MessageCircle, Trash2, ExternalLink } from 'lucide-react'
+import { Eye, MessageCircle, Trash2 } from 'lucide-react'
 
 interface Gallery {
   id: string
@@ -22,59 +22,48 @@ interface GalleryCardProps {
 export function GalleryCard({ gallery, onDelete }: GalleryCardProps) {
   return (
     <div
-      className="rounded-xl shadow-sm p-5 flex items-center justify-between gap-4"
-      style={{ backgroundColor: '#ffffff', border: '1px solid #e8d5b0' }}
+      className="flex items-center gap-4 px-5 py-4 transition-colors"
+      style={{ borderBottom: '1px solid var(--color-sand)', backgroundColor: '#ffffff' }}
+      onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#fdf8f2')}
+      onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#ffffff')}
     >
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-3 mb-1 flex-wrap">
-          <h3 className="text-xl font-serif font-bold" style={{ color: '#2c1810' }}>
-            {gallery.couple}
-          </h3>
-          <span
-            className="px-3 py-0.5 rounded-full text-xs font-medium"
-            style={
-              gallery.status === 'Active'
-                ? { backgroundColor: '#ecfdf5', color: '#27ae60' }
-                : { backgroundColor: '#f3f4f6', color: '#6b7280' }
-            }
-          >
-            {gallery.status}
-          </span>
-        </div>
-        <p className="text-sm mb-3" style={{ color: '#a0856c' }}>
-          {new Date(gallery.date).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
+        <p className="text-base font-medium truncate" style={{ fontFamily: 'var(--font-display)', color: 'var(--color-ink)' }}>
+          {gallery.couple}
         </p>
-        <div className="flex gap-5 text-sm" style={{ color: '#a0856c' }}>
-          <span className="flex items-center gap-1.5">
-            <Eye className="w-3.5 h-3.5" />
-            {gallery.viewCount}
-          </span>
-          <span className="flex items-center gap-1.5">
-            <MessageCircle className="w-3.5 h-3.5" />
-            {gallery.commentCount}
-          </span>
-        </div>
+        <p className="text-xs mt-0.5" style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}>
+          {new Date(gallery.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </p>
       </div>
 
-      <div className="flex gap-2 shrink-0">
+      <div className="w-20 flex justify-center">
+        <span className="px-2 py-0.5 rounded-full text-xs font-medium"
+          style={gallery.status === 'Active'
+            ? { backgroundColor: '#ecfdf5', color: '#27ae60' }
+            : { backgroundColor: '#f3f4f6', color: '#6b7280' }}
+        >
+          {gallery.status}
+        </span>
+      </div>
+
+      <div className="w-16 flex items-center justify-end gap-1.5" style={{ color: '#a0856c' }}>
+        <Eye className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-sm" style={{ fontFamily: 'var(--font-body)', color: 'var(--color-ink)' }}>{gallery.viewCount}</span>
+      </div>
+
+      <div className="w-16 flex items-center justify-end gap-1.5" style={{ color: '#a0856c' }}>
+        <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+        <span className="text-sm" style={{ fontFamily: 'var(--font-body)', color: 'var(--color-ink)' }}>{gallery.commentCount}</span>
+      </div>
+
+      <div className="flex items-center gap-2 ml-2">
         <Link href={`/admin/galleries/${gallery.slug}`}>
-          <button
-            className="px-4 py-1.5 rounded-full text-sm font-medium transition hover:bg-amber-50"
-            style={{ border: '1px solid #8b6914', color: '#8b6914', backgroundColor: 'transparent' }}
-          >
+          <button className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors hover:bg-amber-50" style={{ fontFamily: 'var(--font-body)', border: '1px solid var(--color-gold)', color: 'var(--color-gold)' }}>
             View
           </button>
         </Link>
-        <button
-          onClick={onDelete}
-          className="px-4 py-1.5 rounded-full text-sm font-medium transition hover:bg-red-50"
-          style={{ border: '1px solid #c0392b', color: '#c0392b', backgroundColor: 'transparent' }}
-        >
-          Delete
+        <button onClick={onDelete} className="p-1.5 rounded-lg transition-colors hover:bg-red-50" style={{ color: '#c0392b' }} title="Delete gallery">
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
     </div>

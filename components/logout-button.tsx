@@ -16,8 +16,8 @@ export default function LogoutButton() {
   return (
     <button
       onClick={handleLogout}
-      className="text-sm font-medium px-4 py-2 rounded-full transition-colors hover:bg-amber-50"
-      style={{ color: '#a0856c' }}
+      className="text-sm font-medium px-4 py-2 rounded-lg transition-colors hover:bg-amber-50"
+      style={{ fontFamily: 'var(--font-body)', color: '#a0856c' }}
     >
       Log out
     </button>
